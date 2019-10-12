@@ -118,7 +118,7 @@ int removeProcess(ProcessQueue *processQueue, Process *process) {
 
 //Inicializa os parametros de escalonamento de um processo p. Funcao chamada 
 //normalmente quando o processo deve ser associado ao algoritmo RRPrio
-void rrpInitSchedParams(Process *p, void *rrparams) {
+void rrpInitSchedParams(Process *p, void *rrparams) { // ( feito - Vinicius)
 	RRPSchedParams *rrpSchedParams = (RRPSchedParams*)rrparams;
 	processSetSchedParams(p,rrparams);//Redireciona ponteiro de parametros de escalonamento para uma estrutura especifica.
 	processSetSchedSlot(p,RRPrioSchedSlot);//Modifica o algoritmo de escalonamento associado, por meio do numero do slot registrado para o algoritmo.
