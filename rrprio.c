@@ -1,7 +1,9 @@
 /*
 *  rrprio.c - Implementacao do algoritmo Round Robin com Prioridades e sua API
 *
-*  Autores: SUPER_PROGRAMADORES_C
+*  Autores: Vinicius da Cruz Soranço
+            Joao Cotta Badaro
+            Arthur de Freitas Dornelas
 *  Projeto: Trabalho Pratico I - Sistemas Operacionais
 *  Organizacao: Universidade Federal de Juiz de Fora
 *  Departamento: Dep. Ciencia da Computacao
@@ -55,7 +57,8 @@ void enqueueProcess(ProcessQueue *processQueue, Process *process) {
     enqueueProcessNode(processQueue, processNode);
 }
 
-ProcessNode* dequeueProcessNode(ProcessQueue *processQueue) {
+ProcessNode* dequeueProcessNode(ProcessQueue *processQueue)//desenfileira processo da fila de prioridade
+{
     ProcessNode *processNode = processQueue->first;
 
     if (processNode!=NULL) {
@@ -126,9 +129,42 @@ void rrpInitSchedParams(Process *p, void *rrparams) { // ( feito - Vinicius)
 }
 
 //Retorna o proximo processo a obter a CPU, conforme o algortimo RRPrio 
-Process* rrpSchedule(Process *plist) {
-	//...
-	return NULL;
+Process* rrpSchedule(Process *plist) { // (feito(falta comentar tudo) - Vinicius) - acredito que tenha algum erro nessa funcao porem se comentar a funcao da erro tambem , mas demora pra dar erro
+	if(currentProcess != NULL && processGetStatus(currentProcess)==PROC_READY)//se o processo atual eh diferente de NULL e o status do processo atual eh pronto.
+    {
+        iterationsOnCPU++;
+        return currentProcess;//retorna o processo
+    }
+    
+    iterationsOnCPU=1;
+
+    int i;
+    for(i=7;i>=0;--i)
+    {
+        if(priorityQueues[i].first == NULL) continue;
+
+        ProcessNode *last = priorityQueues[i].last;
+        ProcessNode *processNodeIt = requeueProcessNode(priorityQueues + i);
+
+        int foundProcessReady = 1;
+        while(processGetStatus(processNodeIt->process) != PROC_READY)
+        {
+            if(processNodeIt == last)
+            {
+                foundProcessReady = 0;
+                break;
+            }
+            processNodeIt = requeueProcessNode(priorityQueues + i);
+        }
+
+        if(foundProcessReady)
+        {
+            currentProcess = processNodeIt->process;
+            return currentProcess;
+        }
+
+    }
+    return NULL;
 }
 
 //Libera os parametros de escalonamento de um processo p. Funcao chamada 
@@ -144,14 +180,26 @@ int rrpReleaseParams(Process *p) { //( feito - Vinicius )
 
 //Modifica a prioridade atual de um processo
 //E' a funcao de setSomeFeatureFn() de RRPrio
-void rrpSetPrio(Process *p, void *rrparams) {
-	//...
+void rrpSetPrio(Process *p, void *rrparams) { //( feito - Vinicius )
+	RRPSchedParams *rrpSchedParams = (RRPSchedParams*)processGetSchedParams(p);//instancia com antigos parametros de escalamento do processo p. 
+    RRPSchedParams *rrpSched = (RRPSchedParams*)rrparams;//intancias com novos parametros de escalonamento.
+    int oldprio = rrpSchedParams->priority; //parametros de escalonamento do processo p colocado como prioridade antiga.
+
+    if(rrpSched->priority != oldprio)//se as novas prioridades forem diferentes das antigas.
+    {
+        rrpReleaseParams(p);//Libera os parametros de escalonamento do um processo p.
+        rrpSchedParams = (RRPSchedParams*)malloc(sizeof(RRPSchedParams));//aloca dinamicamente um espaço para a intancia de parametros de escalonamento.
+        rrpSchedParams->priority = rrpSched->priority;//atribui-se os novos parametros de escalonamento à instancia rrpSchedParams. 
+        rrpInitSchedParams(p,rrpSchedParams);//inicia o processo p com os novos paramentros de escalonamento.
+    }
+    
 }
 
 //Notifica a mudanca de status de um processo para possivel manutencao de dados
 //internos ao algoritmo RRPrio, responsavel pelo processo
 void rrpNotifyProcessStatus(Process *p, int oldstatus) {
-	//...
+	// RRPSchedParams *rrpSchedParams = (RRPSchedParams*)processGetStatus(p);
+
 }
 
 //Funcao chamada pela inicializacao do S.O. para a incializacao do escalonador
