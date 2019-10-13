@@ -30,4 +30,15 @@ typedef struct rrp_params {
 //Retorna o numero do slot obtido no registro do algoritmo junto ao escalonador
 int rrpInitSchedInfo();
 
+Process* rrpSchedule(Process *plist);
+
+void rrpInitSchedParams(Process *p, void *rrparams);
+
+int rrpReleaseParams(Process *p);
+
+void rrpSetPrio(Process *p, void *rrparams);
+
+void rrpNotifyProcessStatus(Process *p, int oldstatus);
+
+
 #endif

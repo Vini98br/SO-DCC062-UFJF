@@ -34,7 +34,7 @@ typedef struct process_queue
 } ProcessQueue;
 
 // Cada elemento do vetor representa uma fila de processos daquela prioridade
-ProcessQueue priorityQueues[8];
+ProcessQueue priorityQueues[5];
 int iterationsOnCPU = 0;
 Process *currentProcess = NULL;
 
@@ -139,7 +139,7 @@ Process* rrpSchedule(Process *plist) { // (feito(falta comentar tudo) - Vinicius
     iterationsOnCPU=1;
 
     int i;
-    for(i=7;i>=0;--i)
+    for(i=4;i>=0;--i)
     {
         if(priorityQueues[i].first == NULL) continue;
 
@@ -198,8 +198,8 @@ void rrpSetPrio(Process *p, void *rrparams) { //( feito - Vinicius )
 //Notifica a mudanca de status de um processo para possivel manutencao de dados
 //internos ao algoritmo RRPrio, responsavel pelo processo
 void rrpNotifyProcessStatus(Process *p, int oldstatus) {
-	// RRPSchedParams *rrpSchedParams = (RRPSchedParams*)processGetStatus(p);
-
+	 int status = processGetStatus(p);
+     printf("Status: %d",status);
 }
 
 //Funcao chamada pela inicializacao do S.O. para a incializacao do escalonador
