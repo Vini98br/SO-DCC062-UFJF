@@ -4,7 +4,7 @@
 *  Autores: Vinicius da Cruz Soranço
             Joao Cotta Badaro
             Arthur de Freitas Dornelas
-*  Projeto: Trabalho Pratico I - Sistemas Operacionais
+*  Projeto: Trabalho Pratico I - Sistemas Operacionais - 2019/3
 *  Organizacao: Universidade Federal de Juiz de Fora
 *  Departamento: Dep. Ciencia da Computacao
 *
@@ -14,7 +14,6 @@
 #include "rrprio.h"
 #include <stdio.h>
 #include <string.h>
-#define ITERACOES_POR_PROCESSO 20
 
 //Nome unico do algoritmo. Deve ter 6 caracteres no máximo.
 const char rrpName[]="RRPrio";
@@ -36,51 +35,51 @@ typedef struct process_queue
 
 // Cada elemento do vetor representa uma fila de processos daquela prioridade
 ProcessQueue priorityQueues[5];
-int iterationsOnCPU = 0;
+int iteracoes_CPU = 0;
 Process *currentProcess = NULL;
 
-ProcessQueue *getProcessQueue()
-{
-    return priorityQueues;
-}
+//Funcao que enfileira o nó na fila de prioridade
 void enqueueProcessNode(ProcessQueue *processQueue, ProcessNode *processNode) {
-    if (processQueue->first==NULL) {
-        processQueue->first = processNode;
-        processQueue->last = processNode;
+    if (processQueue->first==NULL) { //Se a fila de processos for vazia
+        processQueue->first = processNode; //o processo será o primeiro
+        processQueue->last = processNode;   // e o processo será o ultimo
     }
-    else {
-        processQueue->last->next = processNode;
-        processQueue->last = processNode;
+    else {  //Se a fila não for vazia
+        processQueue->last->next = processNode; //o processo sera o proximo do ultimo processo da lista
+        processQueue->last = processNode; //o processo sera marcado como o ultimo
     }
 }
 
+//Funcao que coloca o processo em um nó.
 void enqueueProcess(ProcessQueue *processQueue, Process *process) {
     ProcessNode *processNode = (ProcessNode*)malloc(sizeof(ProcessNode));
-    processNode->process = process;
-    processNode->next = NULL;
+    processNode->process = process; //coloca o processo em seu nó de processo
+    processNode->next = NULL; //marca o proximo processo como nulo
 
-    enqueueProcessNode(processQueue, processNode);
+    enqueueProcessNode(processQueue, processNode); //chama a funçao que enfileira o processo na lista de prioridades
 }
 
-ProcessNode* dequeueProcessNode(ProcessQueue *processQueue)//desenfileira processo da fila de prioridade
+//Funcao que desenfileira o primeiro processo da fila de prioridade
+ProcessNode* dequeueProcessNode(ProcessQueue *processQueue)
 {
-    ProcessNode *processNode = processQueue->first;
+    ProcessNode *processNode = processQueue->first; //recebe o primeiro no da fila
 
-    if (processNode!=NULL) {
-        processQueue->first = processNode->next;
-        processNode->next = NULL;
+    if (processNode!=NULL) { //verifica se a fila nao esta vazia
+        processQueue->first = processNode->next; //pega o nó que era o segundo na fila e o coloca como primeiro
+        processNode->next = NULL; //coloca o proximo do nó como nulo
 
-        if (processNode==processQueue->last) {
-            processQueue->last = NULL;
+        if (processNode==processQueue->last) { //verifica se o primeiro processo desenfileirado não era o ultimo da fila
+            processQueue->last = NULL; //se for, aponta o ponteiro do ultimo da fila como NULL
         }
     }
 
     return processNode;
 }
 
+//Funcao que tira um processo da fila de prioridade e o recoloca nela (usado para quando um processo é movido de RUNNING para READY, e precisa ir para o final da fila).
 ProcessNode* requeueProcessNode(ProcessQueue *processQueue) {
-    ProcessNode *processNode = dequeueProcessNode(processQueue);
-    enqueueProcessNode(processQueue, processNode);
+    ProcessNode *processNode = dequeueProcessNode(processQueue); //desinfileira o processo
+    enqueueProcessNode(processQueue, processNode); //enfileira o processo
 
     return processNode;
 }
@@ -126,7 +125,7 @@ int removeProcess(ProcessQueue *processQueue, Process *process) {
 
 //Inicializa os parametros de escalonamento de um processo p. Funcao chamada
 //normalmente quando o processo deve ser associado ao algoritmo RRPrio
-void rrpInitSchedParams(Process *p, void *rrparams) { // ( feito - Vinicius)
+void rrpInitSchedParams(Process *p, void *rrparams) {
 	RRPSchedParams *rrpSchedParams = (RRPSchedParams*)rrparams;
 	processSetSchedParams(p,rrparams);//Redireciona ponteiro de parametros de escalonamento para uma estrutura especifica.
 	processSetSchedSlot(p,RRPrioSchedSlot);//Modifica o algoritmo de escalonamento associado, por meio do numero do slot registrado para o algoritmo.
@@ -134,44 +133,32 @@ void rrpInitSchedParams(Process *p, void *rrparams) { // ( feito - Vinicius)
 }
 
 //Retorna o proximo processo a obter a CPU, conforme o algortimo RRPrio
-
-
 Process* rrpSchedule(Process *plist) {
-     // (feito(falta comentar tudo) - Vinicius) - acredito que tenha algum erro nessa funcao porem se comentar a funcao da erro tambem , mas demora pra dar erro
-	if(currentProcess != NULL && iterationsOnCPU < ITERACOES_POR_PROCESSO && processGetStatus(currentProcess)==PROC_READY)//se o processo atual eh diferente de NULL e o status do processo atual eh pronto.
-    {
-        iterationsOnCPU++;
-        return currentProcess;//retorna o processo
-    }
-
-    iterationsOnCPU=1;
 
     int i;
-    for(i=4;i>=0;--i)
+    for(i=4;i>=0;--i)  //Roda todas as filas de prioridade
     {
-        if(priorityQueues[i].first == NULL) continue;
+        if(priorityQueues[i].first == NULL) continue; //Se o primeiro no da fila eh NULL, entao a fila esta vazia.
 
-        ProcessNode *last = priorityQueues[i].last;
-        ProcessNode *processNodeIt = requeueProcessNode(priorityQueues + i);
+        ProcessNode *last = priorityQueues[i].last;  //Pega o ultimo nó da fila
+        ProcessNode *processNodeAux = requeueProcessNode(priorityQueues + i); //reenfileira o primeiro nó da fila e processNodeAux recebe ele.
 
-        int foundProcessReady = 1;
-        while(processGetStatus(processNodeIt->process) != PROC_READY)
+        int processReady = 1; //verifica se encontrou um processo READY
+        while(processGetStatus(processNodeAux->process) != PROC_READY) //roda ate encontrar um processo que tenha estado READY.
         {
-
-            if(processNodeIt == last)
+            if(processNodeAux == last) //se o processo que foi reenfileirado era o ultimo da fila.
             {
-                foundProcessReady = 0;
+                processReady = 0; //recebe 0 pois nao encontrou.
                 break;
             }
-            processNodeIt = requeueProcessNode(priorityQueues + i);
+            processNodeAux = requeueProcessNode(priorityQueues + i); //reenfileira o processo
         }
 
-        if(foundProcessReady)
+        if(processReady) //Se encontrou um processo em estado READY.
         {
-            currentProcess = processNodeIt->process;
+            currentProcess = processNodeAux->process; //CurrentProcess recebe o processo tirado.
             return currentProcess;
         }
-
     }
 
     return NULL;
@@ -180,7 +167,7 @@ Process* rrpSchedule(Process *plist) {
 //Libera os parametros de escalonamento de um processo p. Funcao chamada
 //normalmente quando o processo e' desassociado do slot de RRPrio
 //Retorna o numero do slot ao qual o processo estava associado
-int rrpReleaseParams(Process *p) { //( feito - Vinicius )
+int rrpReleaseParams(Process *p) {
 	RRPSchedParams *rrpSchedParams = (RRPSchedParams*)processGetSchedParams(p);
 	//instancia da estrutura da rrprio.h recebendo um ponteiro de parametros de escalonamento
 	int index = removeProcess(priorityQueues + rrpSchedParams->priority,p);//busca o processo na fila de prioridade, remove-o e retorna sua posicao
@@ -190,7 +177,7 @@ int rrpReleaseParams(Process *p) { //( feito - Vinicius )
 
 //Modifica a prioridade atual de um processo
 //E' a funcao de setSomeFeatureFn() de RRPrio
-void rrpSetPrio(Process *p, void *rrparams) { //( feito - Vinicius )
+void rrpSetPrio(Process *p, void *rrparams) {
 	RRPSchedParams *rrpSchedParams = (RRPSchedParams*)processGetSchedParams(p);//instancia com antigos parametros de escalamento do processo p.
     RRPSchedParams *rrpSched = (RRPSchedParams*)rrparams;//intancias com novos parametros de escalonamento.
     int oldprio = rrpSchedParams->priority; //parametros de escalonamento do processo p colocado como prioridade antiga.
@@ -209,23 +196,17 @@ void rrpSetPrio(Process *p, void *rrparams) { //( feito - Vinicius )
 //internos ao algoritmo RRPrio, responsavel pelo processo
 void rrpNotifyProcessStatus(Process *p, int oldstatus) {
 	 int status = processGetStatus(p);
-	 if(status == PROC_READY && oldstatus == PROC_WAITING )
+	 int priority = ((RRPSchedParams*)processGetSchedParams(p))->priority; //pega a prioridade do processo.
+
+	 if(status == PROC_READY) //Se o processo passou de WAITING para READY.
      {
-          enqueueProcess(priorityQueues, p);
-         // printf("coloquei na lista %d",processGetPid(p));
-
-
+          enqueueProcess(&priorityQueues[priority], p); //enfileira o processo.
      }
 
-     else if(status == PROC_WAITING && oldstatus == PROC_RUNNING)
+     else if(status == PROC_WAITING) //Se o processo passou de RUNNING para WAITING.
      {
-         dequeueProcessNode(priorityQueues);
-        // printf("tirei da lista %d",processGetPid(p));
-
+         dequeueProcessNode(&priorityQueues[priority]); //desinfileira o processo.
      }
-
-
-
 
 }
 
@@ -234,7 +215,7 @@ void rrpNotifyProcessStatus(Process *p, int oldstatus) {
 //Deve envolver a inicializacao de possiveis parametros gerais
 //Deve envolver o registro do algoritmo junto ao escalonador
 //Retorna o numero do slot obtido no registro do algoritmo junto ao escalonador
-int rrpInitSchedInfo() { //(feito - Vinicius)
+int rrpInitSchedInfo() {
 	SchedInfo *sched=(SchedInfo*)malloc(sizeof(SchedInfo));
 	strcpy(sched->name,rrpName);                    //copia o nome do schedule para o vetor de caracteres.
 	sched->initParamsFn = rrpInitSchedParams;		//a funcao para inicializar os parametros de escalonamento de um processo.
