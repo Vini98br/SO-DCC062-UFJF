@@ -1,5 +1,5 @@
 /*
-*  rrprio.h - Header da API do algoritmo Round Robin com Prioridades 
+*  rrprio.h - Header da API do algoritmo Round Robin com Prioridades
 *
 *  Autor: Marcelo Moreno
 *  Projeto: Trabalho Pratico I - Sistemas Operacionais
@@ -40,5 +40,6 @@ void rrpSetPrio(Process *p, void *rrparams);
 
 void rrpNotifyProcessStatus(Process *p, int oldstatus);
 
+//ProcessQueue* getProcessQueue();
 
 #endif

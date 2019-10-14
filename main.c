@@ -26,7 +26,7 @@
 
 int slotRRP = -1;
 
-Process* _createProcess(Process *plist, int ppid, int slot, void *sp); 
+Process* _createProcess(Process *plist, int ppid, int slot, void *sp);
 
 void _dumpSchedParams(Process *p) {
 	if (processGetSchedSlot(p) == slotRRP) {
@@ -56,7 +56,7 @@ Process* _createRandomProcess(Process *plist, int ppid) {
 		plist = _createProcess(plist, ppid, slotRRP, rrpsp);
 		return plist;
 	}
-	return NULL;	
+	return NULL;
 }
 
 
@@ -99,7 +99,7 @@ Process* _doRandomThings(Process *plist) {
 			continue;
 		}
 		r = rand() / (double)RAND_MAX;
-		if (processGetStatus(p)==PROC_RUNNING && 
+		if (processGetStatus(p)==PROC_RUNNING &&
 		    r < PROCESS_BLOCK_PROBABILITY) {
 			processSetStatus(p,PROC_WAITING);
 			si->notifyProcessStatusFn(p,PROC_RUNNING);
@@ -115,7 +115,7 @@ Process* _doRandomThings(Process *plist) {
 		    r < PROCESS_FEATURE_PROBABILITY) {
 			_doSchedFeature(p);
 		}
-	}			
+	}
 	printf("======================\n");
 	return plist;
 }
@@ -124,17 +124,17 @@ int main(void) {
 	int i = 0, step = 0;
 	char c = ' ';
 	Process* plist = NULL, *p1 = NULL;
-	
+
 	srand(time(NULL));
-	
+
 	//Inicializar escalonadores de processos
 	schedInitSchedInfo();
 	slotRRP = rrpInitSchedInfo();
-	
-	//Criando primeiro processo...	
+
+	//Criando primeiro processo...
 	plist = _createRandomProcess(plist, 1);
 	printf("\n");
-	
+
 	while (c != 'n') {
 		switch (i) {
 			case 0:
@@ -157,7 +157,7 @@ int main(void) {
 			default:
 				p1 = schedSchedule(plist);
 				i++;
-		}		
+		}
 	}
 	return 0;
 }
