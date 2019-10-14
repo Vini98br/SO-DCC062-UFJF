@@ -94,8 +94,8 @@ int removeProcess(ProcessQueue *processQueue, Process *process) {
     }
 
     if (processNodeIt!=NULL) {
-        if (processNodeIt==processQueue->first)//se o processo a ser removido eh o primeiro da fila  
-		{                                      //de prioridade , pega-se o proximo processo da fila.   
+        if (processNodeIt==processQueue->first)//se o processo a ser removido eh o primeiro da fila
+		{                                      //de prioridade , pega-se o proximo processo da fila.
             processQueue->first = processNodeIt->next;
         }
         else//senao aloca-se o proximo processo no lugar do que vai ser removido
@@ -103,7 +103,7 @@ int removeProcess(ProcessQueue *processQueue, Process *process) {
             prevProcessNodeIt->next = processNodeIt->next;
         }
 
-        if (processNodeIt->next == NULL)//se o proximo a ser removido esriver no final da fila 
+        if (processNodeIt->next == NULL)//se o proximo a ser removido esriver no final da fila
             processQueue->last = prevProcessNodeIt;//last recebe entao a posicao anterior do processo a ser removido
 
         if (processNodeIt->process == currentProcess)//se o processo a ser removido eh o processo atual
@@ -119,7 +119,7 @@ int removeProcess(ProcessQueue *processQueue, Process *process) {
 
 //=====Funcoes da API=====
 
-//Inicializa os parametros de escalonamento de um processo p. Funcao chamada 
+//Inicializa os parametros de escalonamento de um processo p. Funcao chamada
 //normalmente quando o processo deve ser associado ao algoritmo RRPrio
 void rrpInitSchedParams(Process *p, void *rrparams) { // ( feito - Vinicius)
 	RRPSchedParams *rrpSchedParams = (RRPSchedParams*)rrparams;
@@ -128,14 +128,17 @@ void rrpInitSchedParams(Process *p, void *rrparams) { // ( feito - Vinicius)
 	enqueueProcess(priorityQueues + rrpSchedParams->priority,p);//enfileira esse processa na fila de prioridade
 }
 
-//Retorna o proximo processo a obter a CPU, conforme o algortimo RRPrio 
-Process* rrpSchedule(Process *plist) { // (feito(falta comentar tudo) - Vinicius) - acredito que tenha algum erro nessa funcao porem se comentar a funcao da erro tambem , mas demora pra dar erro
+//Retorna o proximo processo a obter a CPU, conforme o algortimo RRPrio
+
+
+Process* rrpSchedule(Process *plist) {
+     // (feito(falta comentar tudo) - Vinicius) - acredito que tenha algum erro nessa funcao porem se comentar a funcao da erro tambem , mas demora pra dar erro
 	if(currentProcess != NULL && processGetStatus(currentProcess)==PROC_READY)//se o processo atual eh diferente de NULL e o status do processo atual eh pronto.
     {
         iterationsOnCPU++;
         return currentProcess;//retorna o processo
     }
-    
+
     iterationsOnCPU=1;
 
     int i;
@@ -149,6 +152,7 @@ Process* rrpSchedule(Process *plist) { // (feito(falta comentar tudo) - Vinicius
         int foundProcessReady = 1;
         while(processGetStatus(processNodeIt->process) != PROC_READY)
         {
+
             if(processNodeIt == last)
             {
                 foundProcessReady = 0;
@@ -164,16 +168,17 @@ Process* rrpSchedule(Process *plist) { // (feito(falta comentar tudo) - Vinicius
         }
 
     }
+
     return NULL;
 }
 
-//Libera os parametros de escalonamento de um processo p. Funcao chamada 
+//Libera os parametros de escalonamento de um processo p. Funcao chamada
 //normalmente quando o processo e' desassociado do slot de RRPrio
 //Retorna o numero do slot ao qual o processo estava associado
 int rrpReleaseParams(Process *p) { //( feito - Vinicius )
 	RRPSchedParams *rrpSchedParams = (RRPSchedParams*)processGetSchedParams(p);
-	//instancia da estrutura da rrprio.h recebendo um ponteiro de parametros de escalonamento 
-	int index = removeProcess(priorityQueues + rrpSchedParams->priority,p);//busca o processo na fila de prioridade, remove-o e retorna sua posicao 
+	//instancia da estrutura da rrprio.h recebendo um ponteiro de parametros de escalonamento
+	int index = removeProcess(priorityQueues + rrpSchedParams->priority,p);//busca o processo na fila de prioridade, remove-o e retorna sua posicao
 	free(rrpSchedParams);//libera o bloco rrpSchedParams instanciado acima
 	return index;
 }
@@ -181,7 +186,7 @@ int rrpReleaseParams(Process *p) { //( feito - Vinicius )
 //Modifica a prioridade atual de um processo
 //E' a funcao de setSomeFeatureFn() de RRPrio
 void rrpSetPrio(Process *p, void *rrparams) { //( feito - Vinicius )
-	RRPSchedParams *rrpSchedParams = (RRPSchedParams*)processGetSchedParams(p);//instancia com antigos parametros de escalamento do processo p. 
+	RRPSchedParams *rrpSchedParams = (RRPSchedParams*)processGetSchedParams(p);//instancia com antigos parametros de escalamento do processo p.
     RRPSchedParams *rrpSched = (RRPSchedParams*)rrparams;//intancias com novos parametros de escalonamento.
     int oldprio = rrpSchedParams->priority; //parametros de escalonamento do processo p colocado como prioridade antiga.
 
@@ -189,17 +194,17 @@ void rrpSetPrio(Process *p, void *rrparams) { //( feito - Vinicius )
     {
         rrpReleaseParams(p);//Libera os parametros de escalonamento do um processo p.
         rrpSchedParams = (RRPSchedParams*)malloc(sizeof(RRPSchedParams));//aloca dinamicamente um espaço para a intancia de parametros de escalonamento.
-        rrpSchedParams->priority = rrpSched->priority;//atribui-se os novos parametros de escalonamento à instancia rrpSchedParams. 
+        rrpSchedParams->priority = rrpSched->priority;//atribui-se os novos parametros de escalonamento à instancia rrpSchedParams.
         rrpInitSchedParams(p,rrpSchedParams);//inicia o processo p com os novos paramentros de escalonamento.
     }
-    
+
 }
 
 //Notifica a mudanca de status de um processo para possivel manutencao de dados
 //internos ao algoritmo RRPrio, responsavel pelo processo
 void rrpNotifyProcessStatus(Process *p, int oldstatus) {
 	 int status = processGetStatus(p);
-     printf("Status: %d",status);
+     //printf("Status: %d",status);//
 }
 
 //Funcao chamada pela inicializacao do S.O. para a incializacao do escalonador
@@ -212,7 +217,9 @@ int rrpInitSchedInfo() { //(feito - Vinicius)
 	strcpy(sched->name,rrpName);                    //copia o nome do schedule para o vetor de caracteres.
 	sched->initParamsFn = rrpInitSchedParams;		//a funcao para inicializar os parametros de escalonamento de um processo.
 	sched->scheduleFn = rrpSchedule;                //a funcao para decidir qual o proximo processo a obter a CPU.
-	sched->releaseParamsFn = rrpReleaseParams;      //a funcao para liberar os parametros de escalonemnto de um processo.
+	sched->releaseParamsFn = rrpReleaseParams;          //a funcao para liberar os parametros de escalonemnto de um processo.
+	sched->notifyProcessStatusFn = rrpNotifyProcessStatus;
+	sched->setSomeFeatureFn = rrpSetPrio;
 	RRPrioSchedSlot = schedRegisterScheduler(sched);//funcao que atribui ao slot a estrutura com informacoes do novo escalonador (sched) e retorna o indice do slot ocupado.
 	return RRPrioSchedSlot;
 }
