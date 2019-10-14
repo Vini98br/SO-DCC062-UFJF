@@ -38,35 +38,35 @@ ProcessQueue priorityQueues[5];
 int iterationsOnCPU = 0;
 Process *currentProcess = NULL;
 
-void enqueueProcessNode(ProcessQueue *processQueue, ProcessNode *processNode) {
-    if (processQueue->first==NULL) {
-        processQueue->first = processNode;
-        processQueue->last = processNode;
+void enqueueProcessNode(ProcessQueue *processQueue, ProcessNode *processNode) { //Funcao que coloca o no na fila de prioridade
+    if (processQueue->first==NULL) { //Se a fila de processos for vazia
+        processQueue->first = processNode; //o processo será o primeiro
+        processQueue->last = processNode;   // e o processo será o ultimo
     }
-    else {
-        processQueue->last->next = processNode;
-        processQueue->last = processNode;
+    else {  //Se a fila não for vazia
+        processQueue->last->next = processNode; //o processo sera o proximo do ultimo processo da lista
+        processQueue->last = processNode; //o processo sera marcado como o ultimo
     }
 }
 
-void enqueueProcess(ProcessQueue *processQueue, Process *process) {
+void enqueueProcess(ProcessQueue *processQueue, Process *process) { //Funcao que que coloca o processo no nó de processo
     ProcessNode *processNode = (ProcessNode*)malloc(sizeof(ProcessNode));
-    processNode->process = process;
-    processNode->next = NULL;
+    processNode->process = process; //coloca o processo em seu nó de processo
+    processNode->next = NULL; //marca o proximo processo como nulo
 
-    enqueueProcessNode(processQueue, processNode);
+    enqueueProcessNode(processQueue, processNode); //chama a funçao que enfileira o processo na lista de prioridades
 }
 
 ProcessNode* dequeueProcessNode(ProcessQueue *processQueue)//desenfileira processo da fila de prioridade
 {
-    ProcessNode *processNode = processQueue->first;
+    ProcessNode *processNode = processQueue->first; //recebe o primeiro no da fila
 
-    if (processNode!=NULL) {
-        processQueue->first = processNode->next;
-        processNode->next = NULL;
+    if (processNode!=NULL) { //verifica se a fila nao esta vazia
+        processQueue->first = processNode->next; //pega o nó que era o segundo na fila e o coloca como primeiro
+        processNode->next = NULL; //coloca o proximo do primeiro no como nulo
 
-        if (processNode==processQueue->last) {
-            processQueue->last = NULL;
+        if (processNode==processQueue->last) { //verifica se o primeiro processo desenfileirado não era o ultimo da fila
+            processQueue->last = NULL; //se for, aponta o ponteiro do ultimo da fila como NULL
         }
     }
 
