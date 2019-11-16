@@ -13,6 +13,21 @@
 #define MYFS_H
 
 #include "vfs.h"
+#include "disk.h"
+
+typedef struct 
+{
+    char filename[100];
+    unsigned int inumber;
+} LinkDir;
+
+typedef struct
+{
+  Disk *disk;
+  const char *path;
+  unsigned int fd;
+  LinkDir link;
+} File;
 
 //Funcao para instalar seu sistema de arquivos no S.O., registrando-o junto
 //ao virtual FS (vfs). Retorna um identificador unico (slot), caso
