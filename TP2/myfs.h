@@ -14,6 +14,8 @@
 
 #include "vfs.h"
 #include "disk.h"
+#include "inode.h"
+#include "util.h"
 
 typedef struct 
 {
@@ -24,6 +26,9 @@ typedef struct
 typedef struct
 {
   Disk *disk;
+  Inode *inode;
+  unsigned int blocksize;
+  unsigned int lastByteRead;
   const char *path;
   unsigned int fd;
   LinkDir link;
