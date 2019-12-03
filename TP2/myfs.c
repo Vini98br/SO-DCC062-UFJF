@@ -27,7 +27,7 @@
 typedef struct
 {
   unsigned lastByteRead;
-  unsigned char *path
+  unsigned char *path;
   unsigned int fd;
   unsigned int blocksize;
   Disk *disk;
@@ -145,7 +145,7 @@ bool setBlockFree(Disk *d, unsigned int block) {
     return true;
 }
 
-File* getFile(Disk* d,const char* path) 
+File* getFile(Disk* d,const char* path)
 {
     for (int i = 0; i < MAX_FDS; i++)
     {
@@ -161,8 +161,8 @@ File* getFile(Disk* d,const char* path)
 //Funcao para verificacao se o sistema de arquivos está ocioso, ou seja,
 //se nao ha quisquer descritores de arquivos em uso atualmente. Retorna
 //um positivo se ocioso ou, caso contrario, 0.
-int myFSIsIdle (Disk *d) 
-{ 
+int myFSIsIdle (Disk *d)
+{
 	for (int i = 0; i < MAX_FDS; i++)
 	{
 		if (files[i] != NULL && diskGetId(d) == diskGetId(files[i]->disk))
@@ -207,7 +207,7 @@ int myFSFormat (Disk *d, unsigned int blockSize) {
         }
       }
 
-      return numBlocks > 0 ? numBlocks : -1; 
+      return numBlocks > 0 ? numBlocks : -1;
 }
 
 
@@ -215,11 +215,11 @@ int myFSFormat (Disk *d, unsigned int blockSize) {
 //em path, no disco montado especificado em d, no modo Read/Write,
 //criando o arquivo se nao existir. Retorna um descritor de arquivo,
 //em caso de sucesso. Retorna -1, caso contrario.
-int myFSOpen (Disk *d, const char *path) 
+int myFSOpen (Disk *d, const char *path)
 {
 	File *file = getFile(d,path);
   int numInode;
-  
+
   // arquivo não existe ,entao vamos criá-lo
   if(file == NULL)
   {
@@ -239,7 +239,7 @@ int myFSOpen (Disk *d, const char *path)
 
     file = malloc(sizeof(File));
     file->disk = d;
-    file->path = path; 
+    file->path = path;
     file->inode = inode;
     file->fd = inodeGetNumber(inode);
     files[file->fd - 1] = file;
@@ -247,55 +247,13 @@ int myFSOpen (Disk *d, const char *path)
 
   return file->fd;
 }
-	
+
 //Funcao para a leitura de um arquivo, a partir de um descritor de
 //arquivo existente. Os dados lidos sao copiados para buf e terao
 //tamanho maximo de nbytes. Retorna o numero de bytes efetivamente
 //lidos em caso de sucesso ou -1, caso contrario.
-int myFSRead (int fd, char *buf, unsigned int nbytes) 
+int myFSRead (int fd, char *buf, unsigned int nbytes)
 {
-  /*if(fd < 0 || fd >= MAX_FDS) return -1;
-
-  File* file = files[fd];
-  if(file == NULL)
-      return -1;
-
-  unsigned int fileSize = inodeGetFileSize(file->inode);
-  unsigned int bytesRead = 0;
-  unsigned int currentInodeBlockNum = file->lastByteRead / file->blocksize;
-  unsigned int offset = file->lastByteRead % file->blocksize;
-  unsigned int currentBlock = inodeGetBlockAddr(file->inode, currentInodeBlockNum);
-  unsigned char diskBuffer[DISK_SECTORDATASIZE];
-
-    while(bytesRead < nbytes &&
-          bytesRead + file->lastByteRead < fileSize &&
-          currentBlock > 0) {
-        unsigned int sectorsPerBlock = file->blocksize / DISK_SECTORDATASIZE;
-        unsigned int firstSector = offset / DISK_SECTORDATASIZE;
-        unsigned int firstByteInSector = offset % DISK_SECTORDATASIZE;
-
-        for(int i = firstSector; i < sectorsPerBlock && bytesRead < nbytes; i++) {
-            if(diskReadSector(file->disk, currentBlock + i, diskBuffer) == -1)
-                return -1;
-
-            for(int j = firstByteInSector;  j < DISK_SECTORDATASIZE &&
-                bytesRead < nbytes &&
-                bytesRead + file->lastByteRead < fileSize;  j++) {
-                buf[bytesRead] = diskBuffer[j];
-                bytesRead++;
-            }
-
-            firstByteInSector = 0;
-        }
-
-        offset = 0;
-        currentInodeBlockNum++;
-        currentBlock = inodeGetBlockAddr(file->inode, currentInodeBlockNum);
-    }
-
-    file->lastByteRead += bytesRead;
-
-    return bytesRead;*/
 
 	Inode *inode = NULL;
 
@@ -344,7 +302,7 @@ int myFSWrite (int fd, const char *buf, unsigned int nbytes) {
 
       if(currentBlock == -1)
         break;
-      
+
       if(inodeAddBlock(file->inode, currentBlock) == -1)
       {
         setBlockFree(file->disk, currentBlock);
@@ -354,7 +312,7 @@ int myFSWrite (int fd, const char *buf, unsigned int nbytes) {
 
     for(int i = firstSector; i<sectorsPreBlock && bytesWritten < nbytes; i++)
     {
-      if(diskReadSector(file->disk, currentBlock + i, diskBuffer) == -1) 
+      if(diskReadSector(file->disk, currentBlock + i, diskBuffer) == -1)
         return -1;
 
       for(int j = firstByteInSector; j < DISK_SECTORDATASIZE && bytesWritten < nbytes; j++)
@@ -408,7 +366,7 @@ int myFSClose (int fd) {
 // {
 // 	if(fd < 0 || fd >= MAX_FDS)
 //     return -1;
-  
+
 //   File* dir = files[fd];
 //   if (dir == NULL)
 //     return -1;
