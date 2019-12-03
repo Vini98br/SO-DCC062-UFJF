@@ -24,6 +24,15 @@
 #define SUPER_FREE_SPACE_SECTOR (sizeof(unsigned int) + sizeof(char))
 #define SUPER_FIRST_BLOCK_SECTOR (2 * sizeof(unsigned int) + sizeof(char))
 
+typedef struct
+{
+  unsigned lastByteRead;
+  unsigned char *path
+  unsigned int fd;
+  unsigned int blocksize;
+  Disk *disk;
+  Inode *inode;
+} File;
 
 //Declaracoes globais
 FSInfo *fsInfo;
