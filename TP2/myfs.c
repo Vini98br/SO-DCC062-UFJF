@@ -135,12 +135,24 @@ bool setBlockFree(Disk *d, unsigned int block) {
 
     return true;
 }
+
+File* getFile(Disk* d,const char* path) 
+{
+    for (int i = 0; i < MAX_FDS; i++)
+    {
+      if (files[i] != NULL && files[i]->disk == d && strcmp(files[i]->path,path) == 0)
+      {
+        return files[i];
+      }
+    }
+    return NULL;
+}
 /////FIM - FUNCOES AUXILIARES/////
 
 //Funcao para verificacao se o sistema de arquivos está ocioso, ou seja,
 //se nao ha quisquer descritores de arquivos em uso atualmente. Retorna
 //um positivo se ocioso ou, caso contrario, 0.
-int myFSIsIdle (Disk *d) //feito(vinicius)
+int myFSIsIdle (Disk *d) 
 { 
 	for (int i = 0; i < MAX_FDS; i++)
 	{
@@ -189,23 +201,12 @@ int myFSFormat (Disk *d, unsigned int blockSize) {
       return numBlocks > 0 ? numBlocks : -1; 
 }
 
-File* getFile(Disk* d,const char* path) //feito(vinicius) - func aux
-{
-    for (int i = 0; i < MAX_FDS; i++)
-    {
-      if (files[i] != NULL && files[i]->disk == d && strcmp(files[i]->path,path) == 0)
-      {
-        return files[i];
-      }
-    }
-    return NULL;
-}
 
 //Funcao para abertura de um arquivo, a partir do caminho especificado
 //em path, no disco montado especificado em d, no modo Read/Write,
 //criando o arquivo se nao existir. Retorna um descritor de arquivo,
 //em caso de sucesso. Retorna -1, caso contrario.
-int myFSOpen (Disk *d, const char *path) //feito(vinicius)
+int myFSOpen (Disk *d, const char *path) 
 {
 	File *file = getFile(d,path);
   int numInode;
@@ -242,7 +243,7 @@ int myFSOpen (Disk *d, const char *path) //feito(vinicius)
 //arquivo existente. Os dados lidos sao copiados para buf e terao
 //tamanho maximo de nbytes. Retorna o numero de bytes efetivamente
 //lidos em caso de sucesso ou -1, caso contrario.
-int myFSRead (int fd, char *buf, unsigned int nbytes) //feito(vinicius)
+int myFSRead (int fd, char *buf, unsigned int nbytes) 
 {
   /*if(fd < 0 || fd >= MAX_FDS) return -1;
 
